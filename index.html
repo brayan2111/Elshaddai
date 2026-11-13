@@ -1188,6 +1188,24 @@ button,a,.btn{touch-action:manipulation}
 @media(max-width:900px){.private-live-layout{grid-template-columns:minmax(0,1fr)}.private-live-chat{min-height:420px;max-height:560px}.private-live-video-wrap{min-height:240px}}
 @media(max-width:560px){.admin-resource-shortcuts{grid-template-columns:1fr}.private-live-video-wrap{min-height:210px}.private-live-chat-form{padding:9px}.private-live-reactions button{padding:7px;font-size:1rem}}
 
+
+/* Live: diseño adaptable y controles compactos */
+.private-live-wrap,.private-live-layout,.private-live-stage,.private-live-video-wrap{min-width:0;max-width:100%;box-sizing:border-box}
+.private-live-layout{grid-template-columns:minmax(0,1fr) minmax(280px,360px)}
+.private-live-video-wrap{width:100%;aspect-ratio:16/9;min-height:0;height:auto;max-height: min(70vh,760px);overflow:hidden;border-radius:14px}
+.private-live-video-wrap video{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;min-width:0}
+.live-audio-unlock{position:absolute;z-index:4;right:12px;bottom:12px;width:42px;height:42px;padding:0!important;border-radius:50%!important;display:grid;place-items:center;font-size:0;box-shadow:0 5px 18px #0008}
+.live-audio-unlock::before{content:'🔊';font-size:17px}
+.live-admin-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035)}
+.live-admin-controls button,.live-admin-controls select{min-height:38px}
+.live-admin-controls select{flex:1;min-width:150px;max-width:100%;border:1px solid var(--line);border-radius:9px;padding:8px;background:#101d2b;color:var(--text)}
+.live-guest-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
+.live-guest-tile{min-width:0;position:relative;background:#02060b;border:1px solid var(--line);border-radius:12px;overflow:hidden;aspect-ratio:16/9}
+.live-guest-tile video{width:100%;height:100%;object-fit:contain}
+.live-guest-tile span{position:absolute;left:8px;bottom:7px;padding:4px 7px;background:#0009;border-radius:6px;color:#fff;font-size:12px}
+@media(max-width:900px){.private-live-layout{grid-template-columns:minmax(0,1fr)}.private-live-chat{min-height:320px;max-height:480px}}
+@media(max-width:560px){#live-comunidad{padding-left:10px;padding-right:10px}.private-live-wrap{width:100%;overflow:hidden}.private-live-heading{align-items:flex-start}.private-live-heading h1{font-size:clamp(1.65rem,8vw,2.25rem);overflow-wrap:anywhere}.private-live-stage{padding:8px!important}.private-live-video-wrap{min-height:0;height:auto;aspect-ratio:16/9;max-height:none}.private-live-video-wrap video{object-fit:contain}.private-live-chat{min-height:300px;max-height:430px}.private-live-chat-form{display:flex;min-width:0}.private-live-chat-form input{width:1%;font-size:14px}.private-live-stage-foot{font-size:.76rem}.live-admin-controls{gap:7px}.live-admin-controls button{flex:1 1 calc(50% - 7px);font-size:13px;padding:9px 8px}.live-admin-controls select{flex:1 1 100%;width:100%}.live-audio-unlock{right:8px;bottom:8px;width:36px;height:36px}}
+
 </style>
 </head>
 <body data-view="inicio">
@@ -1911,7 +1929,9 @@ button,a,.btn{touch-action:manipulation}
     <div class="private-live-heading"><div><p class="kicker">Fundación El Shaddai · En directo</p><h1 class="title-gold">Live de la comunidad</h1><p id="communityLiveStatus" class="muted">Conectando con la sala en vivo…</p></div><div class="live-heading-actions"><span class="badge" id="privateLiveBadge">● Fuera del aire</span><a class="btn ghost sm" href="#admin" data-go="admin" data-admin-only hidden>Volver al panel administrativo</a></div></div>
     <div class="private-live-layout">
       <div class="private-live-stage panel">
-        <div class="private-live-video-wrap"><video id="communityLiveVideo" autoplay playsinline controls></video><button type="button" class="btn gold sm live-audio-unlock" id="enableLiveAudio" hidden>Activar sonido</button><div id="privateLivePlaceholder" class="private-live-placeholder"><span>📹</span><b>La transmisión aparecerá aquí</b><small>Cuando el administrador inicie el live, podrá verlo en esta pantalla.</small></div></div>
+        <div class="private-live-video-wrap"><video id="communityLiveVideo" autoplay playsinline controls></video><button type="button" class="btn gold sm live-audio-unlock" id="enableLiveAudio" aria-label="Activar sonido" title="Activar sonido" hidden>Activar sonido</button><div id="privateLivePlaceholder" class="private-live-placeholder"><span>📹</span><b>La transmisión aparecerá aquí</b><small>Cuando el administrador inicie el live, podrá verlo en esta pantalla.</small></div></div>
+        <div id="liveGuestGrid" class="live-guest-grid" aria-live="polite"></div>
+        <div class="live-admin-controls" data-admin-only hidden aria-label="Controles de transmisión"><button type="button" class="btn ghost sm" id="liveMuteBtn">🎙️ Silenciar micrófono</button><button type="button" class="btn ghost sm" id="liveShareBtn">▣ Compartir pantalla</button><select id="liveInviteSelect" aria-label="Seleccionar miembro para invitar"><option value="">Invitar miembro conectado…</option></select><button type="button" class="btn gold sm" id="liveInviteBtn">Invitar a participar</button></div>
         <div class="private-live-stage-foot"><span>🔴 Transmisión en vivo</span><span id="privateLiveViewers">0 conectados</span></div>
       </div>
       <aside class="private-live-chat panel"><div class="private-live-chat-head"><div><b>Chat en vivo</b><small>Converse con la comunidad</small></div><span>💬</span></div>
@@ -3298,7 +3318,7 @@ supabase?.auth.onAuthStateChange(async(_event,session)=>{state.user=session?.use
 
 // Sala Live WebRTC + chat/reacciones en tiempo real mediante Supabase Realtime.
 const livePeers = new Map(), livePendingIce = new Map();
-let liveChannel = null, liveJoined = false, liveIsBroadcasting = false, liveReady = null;
+let liveChannel = null, liveJoined = false, liveIsBroadcasting = false, liveReady = null, liveDisplayStream = null, liveMicMuted = false;
 const liveSend = (event,payload) => liveChannel?.send({type:'broadcast',event,payload});
 const liveName = () => state.profile?.full_name || state.profile?.username || (state.role==='admin'?'Administración':'Miembro');
 function liveAppendMessage(payload){
@@ -3321,11 +3341,54 @@ async function liveCreatePeer(peerId,initiator){
   const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]});
   livePeers.set(peerId,pc);
   pc.onicecandidate=e=>{if(e.candidate)liveSendIce(peerId,e.candidate);};
-  pc.ontrack=e=>{const video=$('communityLiveVideo');if(video){video.muted=false;video.autoplay=true;video.playsInline=true;let stream=e.streams&&e.streams[0];if(!stream){stream=video.srcObject instanceof MediaStream?video.srcObject:new MediaStream();if(!stream.getTracks().some(t=>t.id===e.track.id))stream.addTrack(e.track);}video.srcObject=stream;video.play().then(()=>{if($('enableLiveAudio'))$('enableLiveAudio').hidden=true;}).catch(()=>{if($('enableLiveAudio'))$('enableLiveAudio').hidden=false;});if($('privateLivePlaceholder'))$('privateLivePlaceholder').hidden=true;liveSetStatus(true);}};
+  pc.ontrack=e=>{
+    const stream=e.streams?.[0]||new MediaStream([e.track]);
+    if(state.role==='admin'){
+      let tile=$('live-guest-'+String(peerId).replace(/[^a-zA-Z0-9_-]/g,'_'));
+      if(!tile){tile=document.createElement('div');tile.className='live-guest-tile';tile.id='live-guest-'+String(peerId).replace(/[^a-zA-Z0-9_-]/g,'_');const v=document.createElement('video');v.autoplay=true;v.playsInline=true;v.srcObject=stream;const label=document.createElement('span');label.textContent='Invitado';tile.append(v,label);$('liveGuestGrid')?.append(tile);v.play().catch(()=>{});}
+      else{const v=tile.querySelector('video');if(v&&v.srcObject!==stream){v.srcObject=stream;v.play().catch(()=>{});}}
+      return;
+    }
+    const video=$('communityLiveVideo');if(video){video.muted=false;video.autoplay=true;video.playsInline=true;video.srcObject=stream;video.play().then(()=>{if($('enableLiveAudio'))$('enableLiveAudio').hidden=true;}).catch(()=>{if($('enableLiveAudio'))$('enableLiveAudio').hidden=false;});if($('privateLivePlaceholder'))$('privateLivePlaceholder').hidden=true;liveSetStatus(true);}
+  };
   pc.onconnectionstatechange=()=>{if(['failed','closed','disconnected'].includes(pc.connectionState)){pc.close();livePeers.delete(peerId);}};
-  if(initiator&&state.localStream)state.localStream.getTracks().forEach(track=>pc.addTrack(track,state.localStream));
+  if(initiator&&state.localStream){
+    for(const kind of ['video','audio']){
+      const track=state.localStream.getTracks().find(t=>t.kind===kind);
+      const transceiver=pc.addTransceiver(kind,{direction:'sendrecv'});
+      if(track)await transceiver.sender.replaceTrack(track);
+    }
+  }
   return pc;
 }
+function liveRefreshInviteList(){
+  const select=$('liveInviteSelect');if(!select||!liveChannel)return;
+  const selected=select.value;select.innerHTML='<option value="">Invitar miembro conectado…</option>';
+  const presence=liveChannel.presenceState();
+  Object.entries(presence).forEach(([id,metas])=>{
+    if(id===state.user?.id)return;const meta=metas?.[0]||{};const opt=document.createElement('option');opt.value=id;opt.textContent=(meta.name||'Miembro')+' · '+id.slice(0,7);select.append(opt);
+  });
+  if(selected&&[...select.options].some(o=>o.value===selected))select.value=selected;
+}
+async function liveInviteMember(){
+  if(state.role!=='admin'||!liveIsBroadcasting)return feedback('adminLiveFeedback','Primero inicia la transmisión.',true);
+  const target=$('liveInviteSelect')?.value;if(!target)return feedback('adminLiveFeedback','Selecciona un miembro conectado.',true);
+  liveSend('live-invite',{from:state.user.id,to:target,name:liveName()});feedback('adminLiveFeedback','Invitación enviada. Esperando que el miembro la acepte.');
+}
+async function liveAcceptInvite(payload){
+  if(!payload||payload.to!==state.user?.id||state.role==='admin')return;
+  const accepted=window.confirm((payload.name||'Administración')+' te invita a participar en el Live. ¿Aceptar y activar cámara y micrófono?');
+  if(!accepted){liveSend('live-invite-response',{from:state.user.id,to:payload.from,accepted:false});return;}
+  try{
+    const pc=livePeers.get(payload.from);if(!pc)throw new Error('No se encontró la conexión del Live. Sal y vuelve a entrar a la sala.');
+    const guestStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});state.liveGuestStream=guestStream;
+    for(const kind of ['video','audio']){const track=guestStream.getTracks().find(t=>t.kind===kind);const trans=pc.getTransceivers().find(t=>t.receiver.track.kind===kind&&t.sender&&!t.sender.track);if(track&&trans)await trans.sender.replaceTrack(track);else if(track)pc.addTrack(track,guestStream);}
+    const offer=await pc.createOffer();await pc.setLocalDescription(offer);liveSend('live-guest-offer',{from:state.user.id,to:payload.from,sdp:pc.localDescription});
+    liveSend('live-invite-response',{from:state.user.id,to:payload.from,accepted:true,name:liveName()});
+    feedback('communityLiveStatus','Te uniste como invitado. Mantén esta página abierta durante tu participación.');
+  }catch(err){feedback('communityLiveStatus','No se pudo activar tu cámara y micrófono: '+err.message,true);}
+}
+
 async function liveStartBroadcast(){
   if(state.role!=='admin'||!state.user)return;
   try{
@@ -3341,7 +3404,7 @@ async function liveStartBroadcast(){
   }catch(err){feedback('adminLiveFeedback','No se pudo iniciar cámara/micrófono: '+err.message,true);}
 }
 async function liveStopBroadcast(){
-  liveIsBroadcasting=false;liveSend('live-status',{active:false,admin:state.user?.id});
+  liveIsBroadcasting=false;liveSend('live-status',{active:false,admin:state.user?.id});if(liveDisplayStream){liveDisplayStream.getTracks().forEach(t=>t.stop());liveDisplayStream=null;}
   for(const pc of livePeers.values())pc.close();livePeers.clear();
   state.localStream?.getTracks().forEach(t=>t.stop());state.localStream=null;
   const preview=$('adminCameraPreview');if(preview)preview.srcObject=null;const stage=$('communityLiveVideo');if(stage){stage.srcObject=null;stage.muted=false;}if($('privateLivePlaceholder'))$('privateLivePlaceholder').hidden=false;
@@ -3355,7 +3418,7 @@ async function liveJoin(){
   liveChannel.on('broadcast',{event:'live-status'},async({payload})=>{
     liveSetStatus(!!payload.active);
     if(payload.active&&state.role!=='admin')liveSend('live-request',{from:state.user.id,to:payload.admin||null});
-    if(!payload.active&&state.role!=='admin'){for(const pc of livePeers.values())pc.close();livePeers.clear();const v=$('communityLiveVideo');if(v)v.srcObject=null;if($('privateLivePlaceholder'))$('privateLivePlaceholder').hidden=false;}
+    if(!payload.active&&state.role!=='admin'){for(const pc of livePeers.values())pc.close();livePeers.clear();state.liveGuestStream?.getTracks().forEach(t=>t.stop());state.liveGuestStream=null;const v=$('communityLiveVideo');if(v)v.srcObject=null;if($('privateLivePlaceholder'))$('privateLivePlaceholder').hidden=false;}
   }).on('broadcast',{event:'live-request'},async({payload})=>{
     if(state.role!=='admin'||!liveIsBroadcasting||payload.to&&payload.to!==state.user.id)return;
     const pc=await liveCreatePeer(payload.from,true);const offer=await pc.createOffer();await pc.setLocalDescription(offer);liveSend('live-offer',{from:state.user.id,to:payload.from,sdp:pc.localDescription});
@@ -3366,17 +3429,37 @@ async function liveJoin(){
     if(payload.to!==state.user.id)return;const pc=livePeers.get(payload.from);if(pc&&pc.signalingState==='have-local-offer'){await pc.setRemoteDescription(payload.sdp);for(const c of (livePendingIce.get(payload.from)||[])){try{await pc.addIceCandidate(c);}catch(e){}}livePendingIce.delete(payload.from);}
   }).on('broadcast',{event:'live-ice'},async({payload})=>{
     if(payload.to!==state.user.id||!payload.candidate)return;const pc=livePeers.get(payload.from);if(pc&&pc.remoteDescription){try{await pc.addIceCandidate(payload.candidate);}catch(e){console.warn('ICE candidate',e);}}else{const q=livePendingIce.get(payload.from)||[];q.push(payload.candidate);livePendingIce.set(payload.from,q);}
-  }).on('broadcast',{event:'live-chat'},({payload})=>liveAppendMessage(payload))
+  }).on('broadcast',{event:'live-invite'},({payload})=>liveAcceptInvite(payload))
+  .on('broadcast',{event:'live-guest-offer'},async({payload})=>{
+    if(state.role!=='admin'||payload.to!==state.user.id)return;
+    const pc=livePeers.get(payload.from);if(!pc)return;
+    try{await pc.setRemoteDescription(payload.sdp);const answer=await pc.createAnswer();await pc.setLocalDescription(answer);liveSend('live-guest-answer',{from:state.user.id,to:payload.from,sdp:pc.localDescription});}catch(err){console.warn('Guest negotiation',err);}
+  }).on('broadcast',{event:'live-guest-answer'},async({payload})=>{
+    if(payload.to!==state.user.id)return;const pc=livePeers.get(payload.from);if(pc&&pc.signalingState==='have-local-offer')try{await pc.setRemoteDescription(payload.sdp);}catch(err){console.warn('Guest answer',err);}
+  }).on('broadcast',{event:'live-invite-response'},({payload})=>{if(state.role==='admin'&&payload.to===state.user.id)feedback('adminLiveFeedback',payload.accepted?(payload.name||'El miembro')+' aceptó la invitación.':'El miembro rechazó la invitación.');})
+  .on('broadcast',{event:'live-chat'},({payload})=>liveAppendMessage(payload))
     .on('broadcast',{event:'live-reaction'},({payload})=>liveAppendMessage({...payload,kind:'reaction'}))
-    .on('presence',{event:'sync'},()=>{const n=Object.keys(liveChannel.presenceState()).length;if($('privateLiveViewers'))$('privateLiveViewers').textContent=n+' conectados';});
+    .on('presence',{event:'sync'},()=>{const n=Object.keys(liveChannel.presenceState()).length;if($('privateLiveViewers'))$('privateLiveViewers').textContent=n+' conectados';liveRefreshInviteList();});
   liveReady=new Promise(resolve=>{liveChannel.subscribe(async status=>{if(status==='SUBSCRIBED'){await liveChannel.track({name:liveName(),role:state.role,joined_at:new Date().toISOString()});if(state.role!=='admin')liveSend('live-request',{from:state.user.id});else liveSend('live-status',{active:liveIsBroadcasting,admin:state.user.id});resolve(true);}else if(['CHANNEL_ERROR','TIMED_OUT'].includes(status)){if($('communityLiveStatus'))$('communityLiveStatus').textContent='No se pudo conectar a la sala. Revise la conexión de Supabase Realtime.';resolve(false);}});});
 }
+if($('liveInviteBtn'))$('liveInviteBtn').addEventListener('click',liveInviteMember);
+if($('liveMuteBtn'))$('liveMuteBtn').addEventListener('click',()=>{const tracks=state.localStream?.getAudioTracks()||[];if(!tracks.length)return;liveMicMuted=!liveMicMuted;tracks.forEach(t=>t.enabled=!liveMicMuted);$('liveMuteBtn').textContent=liveMicMuted?'🔇 Activar micrófono':'🎙️ Silenciar micrófono';});
+if($('liveShareBtn'))$('liveShareBtn').addEventListener('click',async()=>{
+  if(!liveIsBroadcasting||!navigator.mediaDevices?.getDisplayMedia)return feedback('adminLiveFeedback','Este navegador o dispositivo no permite compartir pantalla.',true);
+  try{
+    if(liveDisplayStream){liveDisplayStream.getTracks().forEach(t=>t.stop());liveDisplayStream=null;const camera=state.localStream?.getVideoTracks()[0];if(camera){for(const pc of livePeers.values()){const sender=pc.getSenders().find(x=>x.track?.kind==='video');if(sender)await sender.replaceTrack(camera);}const stage=$('communityLiveVideo');if(stage){stage.srcObject=state.localStream;stage.play().catch(()=>{});}const preview=$('adminCameraPreview');if(preview)preview.srcObject=state.localStream;}$('liveShareBtn').textContent='▣ Compartir pantalla';return;}
+    liveDisplayStream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});const screenTrack=liveDisplayStream.getVideoTracks()[0];
+    for(const pc of livePeers.values()){const sender=pc.getSenders().find(x=>x.track?.kind==='video');if(sender)await sender.replaceTrack(screenTrack);}
+    const stage=$('communityLiveVideo');if(stage){stage.srcObject=liveDisplayStream;stage.muted=true;stage.play().catch(()=>{});}const preview=$('adminCameraPreview');if(preview)preview.srcObject=liveDisplayStream;$('liveShareBtn').textContent='Volver a cámara';
+    screenTrack.onended=()=>{if(liveDisplayStream){liveDisplayStream.getTracks().forEach(t=>t.stop());liveDisplayStream=null;}const camera=state.localStream?.getVideoTracks()[0];if(camera){for(const pc of livePeers.values()){const sender=pc.getSenders().find(x=>x.track?.kind==='video');if(sender)sender.replaceTrack(camera);}const v=$('communityLiveVideo');if(v){v.srcObject=state.localStream;v.play().catch(()=>{});}const p=$('adminCameraPreview');if(p)p.srcObject=state.localStream;}$('liveShareBtn').textContent='▣ Compartir pantalla';};
+  }catch(err){feedback('adminLiveFeedback','No se pudo compartir pantalla: '+err.message,true);}
+});
 if($('enableLiveAudio'))$('enableLiveAudio').addEventListener('click',async()=>{const video=$('communityLiveVideo');if(!video)return;video.muted=false;video.volume=1;try{await video.play();$('enableLiveAudio').hidden=true;feedback('communityLiveStatus','Sonido activado. Disfrute la transmisión.');}catch(err){feedback('communityLiveStatus','El navegador no permitió reproducir el audio. Toque reproducir en el video y revise el volumen.',true);}});
 if($('startAdminLive'))$('startAdminLive').addEventListener('click',liveStartBroadcast);
 if($('stopAdminLive'))$('stopAdminLive').addEventListener('click',liveStopBroadcast);
 if($('privateLiveChatForm'))$('privateLiveChatForm').addEventListener('submit',e=>{e.preventDefault();const input=$('privateLiveChatInput'),text=input.value.trim();if(!text||!liveChannel)return;liveSend('live-chat',{name:liveName(),text:text.slice(0,300),at:Date.now()});liveAppendMessage({name:liveName(),text});input.value='';});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-live-reaction]');if(!b||!liveChannel)return;const payload={text:b.dataset.liveReaction,kind:'reaction',name:liveName(),at:Date.now()};liveSend('live-reaction',payload);liveAppendMessage(payload);});
-window.SHADDAI_LIVE={join:liveJoin,start:liveStartBroadcast,stop:liveStopBroadcast};
+window.SHADDAI_LIVE={join:liveJoin,start:liveStartBroadcast,stop:liveStopBroadcast,invite:liveInviteMember};
 
 window.SHADDAI_APP={refreshSession,loadFeed,loadMembers,loadConversations,openDM};
 for(const id of ['comunidad','mensajes','admin']){const el=$(id);if(el)new MutationObserver(()=>{if(el.classList.contains('active')&&state.user){if(id==='comunidad'){loadFeed();loadMembers();}if(id==='mensajes')loadConversations();if(id==='admin')loadAdmin();}}).observe(el,{attributes:true,attributeFilter:['class']});}
